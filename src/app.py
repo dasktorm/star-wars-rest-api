@@ -8,8 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
-#from models import Person
+from models import db, User, People, Planets, Favorites
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -38,7 +37,7 @@ def handle_invalid_usage(error):
 
 @app.route("/people", methods=["GET"])
 def get_people():
-    people = people.query.all()
+    people = People.query.all()
     result = []
     for person in people:
         result.append({'id': person.id, 'name': person.name})
@@ -46,14 +45,14 @@ def get_people():
 
 @app.route("/people/<int:people_id>", methods=["GET"])
 def get_person(people_id):
-    person = people.query.get(people_id)
+    person = People.query.get(people_id)
     if person:
         return jsonify({'id': person.id, 'name': person.name})
-    return jsonify({'error': 'Person not found'}), 404
+    return jsonify({'error': 'People not found'}), 404
 
 @app.route("/planets", methods=["GET"])
 def get_planets():
-    planets = planet.query.all()
+    planets = Planets.query.all()
     result = []
     for planet in planets:
         result.append({'id': planet.id, 'name': planet.name})
@@ -61,7 +60,7 @@ def get_planets():
 
 @app.route("/planets/<int:planet_id>", methods=["GET"])
 def get_planet(planet_id):
-    planet = planet.query.get(planet_id)
+    planet = Planets.query.get(planet_id)
     if planet:
         return jsonify({'id': planet.id, 'name': planet.name})
     return jsonify({'error': 'Planet not found'}), 404
@@ -91,7 +90,7 @@ def get_user_favorites():
 def add_favorite_planet(planet_id):
     # Get the current user ID from the request or session
     user_id = request.args.get('user_id')
-    favorite = favorites(user_id=user_id, planets_id=planet_id)
+    favorite = Favorites(user_id=user_id, planets_id=planet_id)
     db.session.add(favorite)
     db.session.commit()
     return jsonify({'message': 'Favorite planet added successfully'})
